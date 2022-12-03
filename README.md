@@ -117,3 +117,64 @@ python3 manage.py makemigrations
 python3 manage.py migrate
 python3 manage.py runserver
 ```
+
+
+```py
+# mdoels.py
+from django.db import models
+from django.urls import reverse
+
+class MyModelName(models.Model):
+    """A typical class defining a model, derived from the Model class."""
+
+    # Fields
+    my_field_name = models.CharField(max_length=20, help_text='Enter field documentation')
+    # …
+
+    # Metadata
+    class Meta:
+        ordering = ['-my_field_name']
+
+    # Methods
+    def get_absolute_url(self):
+        """Returns the URL to access a particular instance of MyModelName."""
+        return reverse('model-detail-view', args=[str(self.id)])
+
+    def __str__(self):
+        """String for representing the MyModelName object (in Admin site etc.)."""
+        return self.my_field_name
+```
+
+```py
+# Create a new record using the model's constructor.
+record = MyModelName(my_field_name="Instance #1")
+
+# Save the object into the database.
+record.save()
+
+# Access model field values using Python attributes.
+print(record.id) # should return 1 for the first record.
+print(record.my_field_name) # should print 'Instance #1'
+
+# Change record by modifying the fields, then calling save().
+record.my_field_name = "New Instance Name"
+record.save()
+```
+
+```py
+# We can get all records for a model as a QuerySet, using objects.all(). The QuerySet is an iterable object, meaning that it contains a number of objects that we can iterate/loop through.
+
+all_books = Book.objects.all()
+Copy to Clipboard
+# Django's filter() method allows us to filter the returned QuerySet to match a specified text or numeric field against particular criteria. For example, to filter for books that contain "wild" in the title and then count them, we could do the following.
+
+wild_books = Book.objects.filter(title__contains='wild')
+number_wild_books = wild_books.count()
+
+# Will match on: Fiction, Science fiction, non-fiction etc.
+books_containing_genre = Book.objects.filter(genre__name__icontains='fiction')
+
+# Note: You can use underscores (__) to navigate as many levels of relationships (ForeignKey/ManyToManyField) as you like. For example, a Book that had different types, defined using a further "cover" relationship might have a parameter name: type__cover__name__exact='hard'.
+
+# see https://docs.djangoproject.com/en/4.0/topics/db/queries/
+```
